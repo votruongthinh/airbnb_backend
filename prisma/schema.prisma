@@ -1,0 +1,135 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/modules-system/prisma/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model BinhLuan {
+  id                 Int       @id @default(autoincrement())
+  ma_phong           Int
+  ma_nguoi_binh_luan Int
+  ngay_binh_luan     DateTime? @default(now()) @db.Timestamp(0)
+  noi_dung           String?   @db.Text
+  sao_binh_luan      Int?
+  deletedBy          Int       @default(0)
+  isDeleted          Boolean   @default(false)
+  deletedAt          DateTime? @db.Timestamp(0)
+  createdAt          DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt          DateTime  @default(now()) @db.Timestamp(0)
+  Phong              Phong     @relation(fields: [ma_phong], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "BinhLuan_ibfk_1")
+  NguoiDung          NguoiDung @relation(fields: [ma_nguoi_binh_luan], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "BinhLuan_ibfk_2")
+
+  @@index([ma_nguoi_binh_luan], map: "ma_nguoi_binh_luan")
+  @@index([ma_phong], map: "ma_phong")
+}
+
+model DatPhong {
+  id             Int                  @id @default(autoincrement())
+  ma_phong       Int
+  ma_nguoi_dat   Int
+  ngay_den       DateTime             @db.Date
+  ngay_di        DateTime             @db.Date
+  so_luong_khach Int
+  trang_thai     DatPhong_trang_thai? @default(pending)
+  deletedBy      Int                  @default(0)
+  isDeleted      Boolean              @default(false)
+  deletedAt      DateTime?            @db.Timestamp(0)
+  createdAt      DateTime             @default(now()) @db.Timestamp(0)
+  updatedAt      DateTime             @default(now()) @db.Timestamp(0)
+  Phong          Phong                @relation(fields: [ma_phong], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "DatPhong_ibfk_1")
+  NguoiDung      NguoiDung            @relation(fields: [ma_nguoi_dat], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "DatPhong_ibfk_2")
+
+  @@index([ma_nguoi_dat], map: "ma_nguoi_dat")
+  @@index([ma_phong], map: "ma_phong")
+}
+
+model NguoiDung {
+  id        Int        @id @default(autoincrement())
+  name      String     @db.VarChar(100)
+  email     String     @unique(map: "email") @db.VarChar(150)
+  pass_word String     @db.VarChar(255)
+  phone     String?    @db.VarChar(20)
+  birth_day DateTime?  @db.Date
+  gender    Boolean?
+  roleId    Int        @default(2)
+  deletedBy Int        @default(0)
+  isDeleted Boolean    @default(false)
+  deletedAt DateTime?  @db.Timestamp(0)
+  createdAt DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt DateTime   @default(now()) @db.Timestamp(0)
+  BinhLuan  BinhLuan[]
+  DatPhong  DatPhong[]
+  Roles     Roles      @relation(fields: [roleId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "NguoiDung_ibfk_1")
+
+  @@index([roleId], map: "roleId")
+}
+
+model Phong {
+  id        Int        @id @default(autoincrement())
+  ten_phong String     @db.VarChar(255)
+  khach     Int?
+  phong_ngu Int?
+  giuong    Int?
+  phong_tam Int?
+  mo_ta     String?    @db.Text
+  gia_tien  Decimal    @db.Decimal(10, 2)
+  may_giat  Boolean?   @default(false)
+  ban_la    Boolean?   @default(false)
+  ti_vi     Boolean?   @default(false)
+  dieu_hoa  Boolean?   @default(false)
+  wifi      Boolean?   @default(false)
+  bep       Boolean?   @default(false)
+  do_xe     Boolean?   @default(false)
+  ho_boi    Boolean?   @default(false)
+  ban_ui    Boolean?   @default(false)
+  hinh_anh  String?    @db.VarChar(255)
+  vi_tri_Id Int
+  deletedBy Int        @default(0)
+  isDeleted Boolean    @default(false)
+  deletedAt DateTime?  @db.Timestamp(0)
+  createdAt DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt DateTime   @default(now()) @db.Timestamp(0)
+  BinhLuan  BinhLuan[]
+  DatPhong  DatPhong[]
+  ViTri     ViTri      @relation(fields: [vi_tri_Id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Phong_ibfk_1")
+
+  @@index([vi_tri_Id], map: "vi_tri_Id")
+}
+
+model Roles {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(255)
+  description String?     @db.VarChar(255)
+  isActive    Boolean?    @default(true)
+  deletedBy   Int         @default(0)
+  isDeleted   Boolean     @default(false)
+  deletedAt   DateTime?   @db.Timestamp(0)
+  createdAt   DateTime    @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime    @default(now()) @db.Timestamp(0)
+  NguoiDung   NguoiDung[]
+}
+
+model ViTri {
+  id         Int       @id @default(autoincrement())
+  ten_vi_tri String    @db.VarChar(255)
+  tinh_thanh String    @db.VarChar(255)
+  quoc_gia   String    @db.VarChar(255)
+  hinh_anh   String?   @db.VarChar(255)
+  deletedBy  Int       @default(0)
+  isDeleted  Boolean   @default(false)
+  deletedAt  DateTime? @db.Timestamp(0)
+  createdAt  DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt  DateTime  @default(now()) @db.Timestamp(0)
+  Phong      Phong[]
+}
+
+enum DatPhong_trang_thai {
+  pending
+  confirmed
+  cancelled
+}
