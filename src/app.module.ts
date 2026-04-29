@@ -10,9 +10,10 @@ import { LoggingInterceptor } from './common/interceptor/logging.interceptor';
 import { RolesGuard } from './common/guard/roles.guard';
 import { ResponseSuccessInterceptor } from './common/interceptor/response-success.interceptor';
 import { LocationModule } from './modules-api/location/location.module';
+import { RoomModule } from './modules-api/room/room.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, TokenModule, LocationModule],
+  imports: [AuthModule, PrismaModule, TokenModule, LocationModule, RoomModule],
   controllers: [AppController],
   providers: [
     AppService,

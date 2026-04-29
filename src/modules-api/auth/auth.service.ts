@@ -18,6 +18,7 @@ export class AuthService {
     private prisma: PrismaService,
     private tokenService: TokenService,
   ) {}
+
   async register(body: registerDTO) {
     try {
       const { name, email, pass_word, phone, birth_day, gender } = body;
@@ -54,6 +55,7 @@ export class AuthService {
       throw new InternalServerErrorException('Lỗi đăng ký người dùng');
     }
   }
+
   async login(body: LoginDto) {
     const { email, pass_word } = body;
 

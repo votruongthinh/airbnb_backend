@@ -1,34 +1,82 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { LocationService } from './location.service';
-import { CreateLocationDto } from './dto/create-location.dto';
-import { UpdateLocationDto } from './dto/update-location.dto';
+import { LocationDto } from './dto/location.dto';
+import { QueryLocationDto } from './dto/query-location.dto';
+import { multerImageOptions } from 'src/common/multer/cloud.config';
+//import { User } from 'src/common/decorator/user.decorator';
+import { Roles } from 'src/common/decorator/role.decorator';
 
-@Controller('location')
+@Controller('locations')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
   @Post()
-  create(@Body() createLocationDto: CreateLocationDto) {
-    return this.locationService.create(createLocationDto);
+  @Roles(1)
+  @UseInterceptors(FileInterceptor('hinh_anh', multerImageOptions))
+  createLocation(
+    @Body() body: LocationDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const result = this.locationService.createLocation(body, file);
+    return result;
   }
 
   @Get()
-  findAll() {
-    return this.locationService.findAll();
+  findAllLocation(@Query() query: QueryLocationDto) {
+    const result = this.locationService.findAllLocation(query);
+    return result;
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.locationService.findOne(+id);
+  findByIdLocation(@Param('id', ParseIntPipe) id: number) {
+    const result = this.locationService.findByIdLocation(id);
+    return result;
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLocationDto: UpdateLocationDto) {
-    return this.locationService.update(+id, updateLocationDto);
+  @Roles(1)
+  @UseInterceptors(FileInterceptor('hinh_anh', multerImageOptions))
+  updateLocation(
+    @Body() body: LocationDto,
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const result = this.locationService.updateLocation(body, id, file);
+    return result;
+  }
+
+  @Post('upload-img/:id')
+  @Roles(1)
+  @UseInterceptors(FileInterceptor('file', multerImageOptions))
+  uploadImageLocation(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+    const result = this.locationService.uploadImageLocation(id, file);
+    return result;
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.locationService.remove(+id);
+  @Roles(1)
+  deleteLocation(@Param('id', ParseIntPipe) id: number) {
+    const result = this.locationService.deleteLocation(id);
+    return result;
   }
 }
