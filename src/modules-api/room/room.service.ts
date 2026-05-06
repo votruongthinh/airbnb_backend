@@ -8,11 +8,12 @@ import {
 } from 'src/common/multer/cloud.config';
 import { QueryRoomDto } from './dto/query-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
-import { buildQueryPrismaRoom } from 'src/common/helpers/build-query-prisma-room-helper'
+import { buildQueryPrismaRoom } from 'src/common/helpers/room-query';
 @Injectable()
 export class RoomService {
 
   constructor(private prisma: PrismaService) { }
+
 
   async createRoom(body: RoomDto, file?: Express.Multer.File) {
     const {

@@ -56,15 +56,20 @@ export class QueryRoomDto {
     giuong?: number;
 
 
+    // Public query param: `id_vi_tri`.
+    // Still accepts legacy `vi_tri_Id` for backward compatibility.
     @IsOptional()
-    @Type(() => Number)
+    @Transform(({ value, obj }) => {
+        const raw = value ?? obj.vi_tri_Id;
+
+        if (raw === undefined || raw === null || raw === '') {
+            return undefined;
+        }
+
+        return Number(raw);
+    })
     @IsNumber()
     id_vi_tri?: number;
-
-    @IsOptional()
-    @Type(() => Number)
-    @IsNumber()
-    vi_tri_Id?: number;
 
 
     @IsOptional()

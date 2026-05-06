@@ -4,8 +4,9 @@ import {
   deleteImageFromCloudinary,
   uploadImageToCloudinary,
 } from 'src/common/multer/cloud.config';
-import { buildQueryPrismaLocation } from 'src/common/helpers/build-query-prisma-location-helper';
+import { buildQueryPrismaLocation } from 'src/common/helpers/location-query';
 import { LocationDto } from './dto/location.dto';
+import { UpdateLocationDto } from './dto/update-location.dto';
 import { QueryLocationDto } from './dto/query-location.dto';
 
 @Injectable()
@@ -108,12 +109,10 @@ export class LocationService {
   }
 
   async updateLocation(
-    body: LocationDto,
+    body: UpdateLocationDto,
     id: number,
     file?: Express.Multer.File,
   ) {
-    const { ten_vi_tri, tinh_thanh, quoc_gia } = body;
-
     const existingLocation = await this.prisma.viTri.findFirst({
       where: {
         id: id,
@@ -129,11 +128,31 @@ export class LocationService {
       throw new BadRequestException('File phải là hình ảnh');
     }
 
+    const updateData = Object.fromEntries(
+      Object.entries({
+        ten_vi_tri: body.ten_vi_tri,
+        tinh_thanh: body.tinh_thanh,
+        quoc_gia: body.quoc_gia,
+      }).filter(([, value]) => value !== undefined),
+    ) as Partial<Pick<UpdateLocationDto, 'ten_vi_tri' | 'tinh_thanh' | 'quoc_gia'>>;
+
+    if (!Object.keys(updateData).length && !file) {
+      throw new BadRequestException(
+        'vui lòng gửi ít nhất 1 thông tin để cập nhật',
+      );
+    }
+
+    const nextLocation = {
+      ten_vi_tri: updateData.ten_vi_tri ?? existingLocation.ten_vi_tri,
+      tinh_thanh: updateData.tinh_thanh ?? existingLocation.tinh_thanh,
+      quoc_gia: updateData.quoc_gia ?? existingLocation.quoc_gia,
+    };
+
     const duplicateLocation = await this.prisma.viTri.findFirst({
       where: {
-        ten_vi_tri: ten_vi_tri,
-        tinh_thanh: tinh_thanh,
-        quoc_gia: quoc_gia,
+        ten_vi_tri: nextLocation.ten_vi_tri,
+        tinh_thanh: nextLocation.tinh_thanh,
+        quoc_gia: nextLocation.quoc_gia,
         isDeleted: false,
         id: { not: id },
       },
@@ -149,9 +168,7 @@ export class LocationService {
     const item = await this.prisma.viTri.update({
       where: { id: id },
       data: {
-        ten_vi_tri: ten_vi_tri,
-        tinh_thanh: tinh_thanh,
-        quoc_gia: quoc_gia,
+        ...updateData,
         ...(hinhAnh && { hinh_anh: hinhAnh }),
       },
     });

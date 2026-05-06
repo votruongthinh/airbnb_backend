@@ -15,6 +15,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LocationService } from './location.service';
 import { LocationDto } from './dto/location.dto';
+import { UpdateLocationDto } from './dto/update-location.dto';
 import { QueryLocationDto } from './dto/query-location.dto';
 import { multerImageOptions } from 'src/common/multer/cloud.config';
 //import { User } from 'src/common/decorator/user.decorator';
@@ -51,7 +52,7 @@ export class LocationController {
   @Roles(1)
   @UseInterceptors(FileInterceptor('hinh_anh', multerImageOptions))
   updateLocation(
-    @Body() body: LocationDto,
+    @Body() body: UpdateLocationDto,
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile() file?: Express.Multer.File,
   ) {

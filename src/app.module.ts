@@ -11,9 +11,10 @@ import { RolesGuard } from './common/guard/roles.guard';
 import { ResponseSuccessInterceptor } from './common/interceptor/response-success.interceptor';
 import { LocationModule } from './modules-api/location/location.module';
 import { RoomModule } from './modules-api/room/room.module';
+import { BookingsModule } from './modules-api/bookings/bookings.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, TokenModule, LocationModule, RoomModule],
+  imports: [AuthModule, PrismaModule, TokenModule, LocationModule, RoomModule, BookingsModule],
   controllers: [AppController],
   providers: [
     AppService,
